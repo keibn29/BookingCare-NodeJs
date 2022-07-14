@@ -20,15 +20,12 @@ module.exports = {
                 type: Sequelize.TEXT('long')
             },
             doctorId: {
-                allowNull: false,
                 type: Sequelize.INTEGER
             },
             specialtyId: {
-                allowNull: false,
                 type: Sequelize.INTEGER
             },
             clinicId: {
-                allowNull: false,
                 type: Sequelize.INTEGER
             },
             createdAt: {

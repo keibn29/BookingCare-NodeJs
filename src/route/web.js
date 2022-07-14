@@ -15,13 +15,18 @@ let initWebRoutes = (app) => {
     router.post('/delete-crud', homeController.deleteCRUD)
 
     router.post('/api/login', userController.handleLogin)
+
     router.get('/api/get-all-users', userController.handleGetAllUsers)
     router.post('/api/create-new-user', userController.handleCreateNewUser)
     router.put('/api/edit-user', userController.handleEditUser)
     router.delete('/api/delete-user', userController.handleDeleteUser)
 
     router.get('/api/allcode', userController.handleGetAllCode)
+
     router.get('/api/top-doctor-homepage', doctorController.handleGetTopDoctorsHomepage)
+
+    router.get('/api/get-all-doctors', doctorController.handleGetAllDoctors)
+    router.post('/api/create-doctor-info', doctorController.handleCreateDoctorInfo)
 
     return app.use('/', router)
 }
