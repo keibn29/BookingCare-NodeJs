@@ -94,15 +94,22 @@ let getDoctorInfo = (doctorId) => {
                         id: doctorId
                     },
                     attributes: {
-                        exclude: ['password', 'image']
+                        exclude: ['password']
                     },
                     include: [
                         { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
                         { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] }
                     ],
-                    raw: true,
+                    raw: false,
                     nest: true
                 })
+                if (!doctorInfo) {
+                    doctorInfo = {}
+                }
+                //decode-base64
+                if (doctorInfo && doctorInfo.image) {
+                    doctorInfo.image = new Buffer(doctorInfo.image, 'base64').toString('binary');
+                }
                 resolve({
                     errCode: 0,
                     doctorInfo
@@ -114,9 +121,47 @@ let getDoctorInfo = (doctorId) => {
     })
 }
 
+let editDoctorInfo = (inputData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!inputData.doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "Missing required parameters"
+                })
+            } else {
+                let doctorInfo = await db.Markdown.findOne({
+                    where: {
+                        doctorId: inputData.doctorId
+                    }
+                })
+                if (doctorInfo) {
+                    doctorInfo.contentHTML = inputData.contentHTML;
+                    doctorInfo.contentMarkdown = inputData.contentMarkdown;
+                    doctorInfo.description = inputData.description;
+
+                    await doctorInfo.save();
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'ok'
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Doctor not found!'
+                    })
+                }
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     GetTopDoctorsHomepage,
     getetAllDoctors,
     createDoctorInfo,
-    getDoctorInfo
+    getDoctorInfo,
+    editDoctorInfo
 }

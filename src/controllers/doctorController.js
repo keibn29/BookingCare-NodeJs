@@ -52,9 +52,23 @@ let handleGetDoctorInfo = async (req, res) => {
     }
 }
 
+let handleEditDoctorInfo = async (req, res) => {
+    try {
+        let message = await doctorService.editDoctorInfo(req.body);
+
+        return res.status(200).json(message)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleGetTopDoctorsHomepage,
     handleGetAllDoctors,
     handleCreateDoctorInfo,
-    handleGetDoctorInfo
+    handleGetDoctorInfo,
+    handleEditDoctorInfo
 }
