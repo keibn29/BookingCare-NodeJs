@@ -158,10 +158,38 @@ let editDoctorInfo = (inputData) => {
     })
 }
 
+let getMarkdown = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                let infoMarkdown = await db.Markdown.findOne({
+                    where: {
+                        doctorId: doctorId
+                    },
+                    raw: true,
+                    nest: true
+                })
+                resolve({
+                    errCode: 0,
+                    infoMarkdown
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     GetTopDoctorsHomepage,
     getetAllDoctors,
     createDoctorInfo,
     getDoctorInfo,
-    editDoctorInfo
+    editDoctorInfo,
+    getMarkdown
 }
