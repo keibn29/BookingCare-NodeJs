@@ -78,11 +78,25 @@ let handleGetMarkdown = async (req, res) => {
     }
 }
 
+//bulk-create-schedule
+let handleBulkCreateSchedule = async (req, res) => {
+    try {
+        let message = await doctorService.bulkCreateSchedule(req.body)
+        return res.status(200).json(message)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleGetTopDoctorsHomepage,
     handleGetAllDoctors,
     handleCreateDoctorInfo,
     handleGetDoctorInfo,
     handleEditDoctorInfo,
-    handleGetMarkdown
+    handleGetMarkdown,
+    handleBulkCreateSchedule
 }

@@ -1,4 +1,8 @@
 import db from '../models/index';
+require('dotenv').config();
+import _ from 'lodash';
+
+const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
 let GetTopDoctorsHomepage = (limitInput) => {
     return new Promise(async (resolve, reject) => {
@@ -71,7 +75,7 @@ let createDoctorInfo = (inputData) => {
                 })
                 resolve({
                     errCode: 0,
-                    errMessage: 'ok'
+                    errMessage: 'OK'
                 })
             }
         } catch (e) {
@@ -143,7 +147,7 @@ let editDoctorInfo = (inputData) => {
                     await doctorInfo.save();
                     resolve({
                         errCode: 0,
-                        errMessage: 'ok'
+                        errMessage: 'OK'
                     })
                 } else {
                     resolve({
@@ -185,11 +189,67 @@ let getMarkdown = (doctorId) => {
     })
 }
 
+let bulkCreateSchedule = (scheduleInput) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!scheduleInput.result || !scheduleInput.doctorId || !scheduleInput.date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+            let schedule = scheduleInput.result;
+            if (schedule && schedule.length > 0) {
+                schedule = schedule.map((item) => {
+                    item.maxNumber = MAX_NUMBER_SCHEDULE;
+                    return item;
+                })
+            }
+
+            //get all existing data
+            let existing = await db.Schedule.findAll({
+                where: {
+                    doctorId: scheduleInput.doctorId,
+                    date: scheduleInput.date
+                },
+                attributes: ['timeType', 'date', 'doctorId', 'maxNumber'],
+                raw: true
+            })
+
+            //convert date
+            if (existing && existing.length > 0) {
+                existing = existing.map((item) => {
+                    item.date = new Date(item.date).getTime();
+                    return item;
+                })
+            }
+
+            //compare different vs DB
+            let toCreate = _.differenceWith(schedule, existing, (a, b) => {
+                return a.timeType === b.timeType;
+            })
+
+            //create data
+            if (toCreate && toCreate.length > 0) {
+                await db.Schedule.bulkCreate(toCreate);
+            }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'OK'
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     GetTopDoctorsHomepage,
     getetAllDoctors,
     createDoctorInfo,
     getDoctorInfo,
     editDoctorInfo,
-    getMarkdown
+    getMarkdown,
+    bulkCreateSchedule
 }
