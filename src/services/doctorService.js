@@ -1,6 +1,6 @@
 import db from '../models/index';
 require('dotenv').config();
-import _ from 'lodash';
+import _, { reject } from 'lodash';
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -192,6 +192,7 @@ let getMarkdown = (doctorId) => {
 let bulkCreateSchedule = (scheduleInput) => {
     return new Promise(async (resolve, reject) => {
         try {
+            console.log(scheduleInput.date)
             if (!scheduleInput.result || !scheduleInput.doctorId || !scheduleInput.date) {
                 resolve({
                     errCode: 1,
@@ -215,18 +216,19 @@ let bulkCreateSchedule = (scheduleInput) => {
                 attributes: ['timeType', 'date', 'doctorId', 'maxNumber'],
                 raw: true
             })
+            console.log('check existing: ', existing)
 
-            //convert date
-            if (existing && existing.length > 0) {
-                existing = existing.map((item) => {
-                    item.date = new Date(item.date).getTime();
-                    return item;
-                })
-            }
+            //convert date to timestamp
+            // if (existing && existing.length > 0) {
+            //     existing = existing.map((item) => {
+            //         item.date = new Date(item.date).getTime();
+            //         return item;
+            //     })
+            // }
 
             //compare different vs DB
             let toCreate = _.differenceWith(schedule, existing, (a, b) => {
-                return a.timeType === b.timeType;
+                return a.timeType === b.timeType && +a.date === +b.date;   // + : convert string to integer
             })
 
             //create data
@@ -244,6 +246,34 @@ let bulkCreateSchedule = (scheduleInput) => {
     })
 }
 
+let getScheduleByDate = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId || !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+            let schedule = await db.Schedule.findAll({
+                where: {
+                    doctorId: doctorId,
+                    date: date
+                },
+            })
+            if (!schedule) {
+                schedule = []
+            }
+            resolve({
+                errCode: 0,
+                schedule
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     GetTopDoctorsHomepage,
     getetAllDoctors,
@@ -251,5 +281,6 @@ module.exports = {
     getDoctorInfo,
     editDoctorInfo,
     getMarkdown,
-    bulkCreateSchedule
+    bulkCreateSchedule,
+    getScheduleByDate
 }
