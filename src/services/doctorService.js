@@ -61,7 +61,10 @@ let getetAllDoctors = () => {
 let createDoctorInfo = (inputData) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!inputData.doctorId || !inputData.contentHTML || !inputData.contentMarkdown) {
+            if (!inputData.doctorId || !inputData.contentHTML
+                || !inputData.contentMarkdown || !inputData.priceId
+                || !inputData.provinceId || !inputData.paymentId
+                || !inputData.nameClinic || !inputData.addressClinic) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
@@ -72,6 +75,15 @@ let createDoctorInfo = (inputData) => {
                     contentMarkdown: inputData.contentMarkdown,
                     description: inputData.description,
                     doctorId: inputData.doctorId
+                })
+                await db.Doctor.create({
+                    doctorId: inputData.doctorId,
+                    priceId: inputData.priceId,
+                    provinceId: inputData.provinceId,
+                    paymentId: inputData.paymentId,
+                    nameClinic: inputData.nameClinic,
+                    addressClinic: inputData.addressClinic,
+                    note: inputData.note
                 })
                 resolve({
                     errCode: 0,
@@ -134,27 +146,36 @@ let editDoctorInfo = (inputData) => {
                     errMessage: "Missing required parameters"
                 })
             } else {
-                let doctorInfo = await db.Markdown.findOne({
+                let doctorMarkdown = await db.Markdown.findOne({
                     where: {
                         doctorId: inputData.doctorId
                     }
                 })
-                if (doctorInfo) {
-                    doctorInfo.contentHTML = inputData.contentHTML;
-                    doctorInfo.contentMarkdown = inputData.contentMarkdown;
-                    doctorInfo.description = inputData.description;
-
-                    await doctorInfo.save();
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'OK'
-                    })
-                } else {
+                let doctorDetail = await db.Doctor.findOne({
+                    where: {
+                        doctorId: inputData.doctorId
+                    }
+                })
+                if (!doctorMarkdown || !doctorDetail) {
                     resolve({
                         errCode: 2,
                         errMessage: 'Doctor not found!'
                     })
                 }
+
+                doctorMarkdown.contentHTML = inputData.contentHTML;
+                doctorMarkdown.contentMarkdown = inputData.contentMarkdown;
+                doctorMarkdown.description = inputData.description;
+
+                doctorDetail.priceId = inputData.priceId;
+                doctorDetail.provinceId = inputData.provinceId;
+                doctorDetail.paymentId = inputData.paymentId;
+                doctorDetail.nameClinic = inputData.nameClinic;
+                doctorDetail.addressClinic = inputData.addressClinic;
+                doctorDetail.note = inputData.note;
+
+                await doctorMarkdown.save();
+                await doctorDetail.save();
             }
         } catch (e) {
             reject(e)
