@@ -1,6 +1,7 @@
 import db from '../models/index';
 require('dotenv').config();
 import _, { reject } from 'lodash';
+import doctor from '../models/doctor';
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -69,13 +70,27 @@ let createDoctorInfo = (inputData) => {
                     errCode: 1,
                     errMessage: 'Missing required parameters'
                 })
-            } else {
+            }
+
+            let existingMarkdown = await db.Markdown.findOne({
+                where: {
+                    doctorId: inputData.doctorId
+                }
+            })
+            if (!existingMarkdown) {
                 await db.Markdown.create({
                     contentHTML: inputData.contentHTML,
                     contentMarkdown: inputData.contentMarkdown,
                     description: inputData.description,
                     doctorId: inputData.doctorId
                 })
+            }
+            let existingDetail = await db.Doctor.findOne({
+                where: {
+                    doctorId: inputData.doctorId
+                }
+            })
+            if (!existingDetail) {
                 await db.Doctor.create({
                     doctorId: inputData.doctorId,
                     priceId: inputData.priceId,
@@ -85,11 +100,19 @@ let createDoctorInfo = (inputData) => {
                     addressClinic: inputData.addressClinic,
                     note: inputData.note
                 })
+            }
+
+            if (existingMarkdown && existingDetail) {
                 resolve({
-                    errCode: 0,
-                    errMessage: 'OK'
+                    errCode: 3,
+                    errMessage: 'Doctor Info is existing!'
                 })
             }
+
+            resolve({
+                errCode: 0,
+                errMessage: 'OK'
+            })
         } catch (e) {
             reject(e)
         }
@@ -114,7 +137,16 @@ let getDoctorInfo = (doctorId) => {
                     },
                     include: [
                         { model: db.Markdown, attributes: ['description', 'contentHTML', 'contentMarkdown'] },
-                        { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] }
+                        { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                        {
+                            model: db.Doctor,
+                            attributes: ['priceId', 'provinceId', 'paymentId', 'addressClinic', 'nameClinic', 'note'],
+                            include: [
+                                { model: db.Allcode, as: 'priceData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'provinceData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi'] },
+                            ]
+                        },
                     ],
                     raw: false,
                     nest: true
@@ -145,38 +177,44 @@ let editDoctorInfo = (inputData) => {
                     errCode: 1,
                     errMessage: "Missing required parameters"
                 })
-            } else {
-                let doctorMarkdown = await db.Markdown.findOne({
-                    where: {
-                        doctorId: inputData.doctorId
-                    }
-                })
-                let doctorDetail = await db.Doctor.findOne({
-                    where: {
-                        doctorId: inputData.doctorId
-                    }
-                })
-                if (!doctorMarkdown || !doctorDetail) {
-                    resolve({
-                        errCode: 2,
-                        errMessage: 'Doctor not found!'
-                    })
-                }
-
-                doctorMarkdown.contentHTML = inputData.contentHTML;
-                doctorMarkdown.contentMarkdown = inputData.contentMarkdown;
-                doctorMarkdown.description = inputData.description;
-
-                doctorDetail.priceId = inputData.priceId;
-                doctorDetail.provinceId = inputData.provinceId;
-                doctorDetail.paymentId = inputData.paymentId;
-                doctorDetail.nameClinic = inputData.nameClinic;
-                doctorDetail.addressClinic = inputData.addressClinic;
-                doctorDetail.note = inputData.note;
-
-                await doctorMarkdown.save();
-                await doctorDetail.save();
             }
+
+            let doctorMarkdown = await db.Markdown.findOne({
+                where: {
+                    doctorId: inputData.doctorId
+                }
+            })
+            let doctorDetail = await db.Doctor.findOne({
+                where: {
+                    doctorId: inputData.doctorId
+                }
+            })
+            if (!doctorMarkdown || !doctorDetail) {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'Doctor not found!'
+                })
+            }
+
+            doctorMarkdown.contentHTML = inputData.contentHTML;
+            doctorMarkdown.contentMarkdown = inputData.contentMarkdown;
+            doctorMarkdown.description = inputData.description;
+
+            doctorDetail.priceId = inputData.priceId;
+            doctorDetail.provinceId = inputData.provinceId;
+            doctorDetail.paymentId = inputData.paymentId;
+            doctorDetail.nameClinic = inputData.nameClinic;
+            doctorDetail.addressClinic = inputData.addressClinic;
+            doctorDetail.note = inputData.note;
+
+            await doctorMarkdown.save();
+            await doctorDetail.save();
+
+            resolve({
+                errCode: 0,
+                errMessage: 'OK'
+            })
+
         } catch (e) {
             reject(e)
         }
