@@ -25,6 +25,7 @@ let initWebRoutes = (app) => {
 
     router.get('/api/top-doctor-homepage', doctorController.handleGetTopDoctorsHomepage)
 
+    //mỗi 1 component nên có 1 api riêng -> độc lập dữ liệu giữa các component
     router.get('/api/get-all-doctors', doctorController.handleGetAllDoctors)
     router.post('/api/create-doctor-info', doctorController.handleCreateDoctorInfo)
     router.get('/api/get-doctor-info', doctorController.handleGetDoctorInfo)
@@ -32,6 +33,7 @@ let initWebRoutes = (app) => {
     router.put('/api/edit-doctor-info', doctorController.handleEditDoctorInfo)
     router.post('/api/bulk-create-schedule', doctorController.handleBulkCreateSchedule)
     router.get('/api/get-schedule-by-date', doctorController.handleGetScheduleByDate)
+    router.get('/api/get-doctor-info-extra', doctorController.handleGetDoctorInfoExtra)
 
     return app.use('/', router)
 }
