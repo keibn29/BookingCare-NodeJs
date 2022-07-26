@@ -115,6 +115,18 @@ let handleGetDoctorInfoExtra = async (req, res) => {
     }
 }
 
+let handleGetDoctorInfoGeneral = async (req, res) => {
+    try {
+        let infoGeneral = await doctorService.getDoctorInfoGeneral(req.query.doctorId)
+        return res.status(200).json(infoGeneral)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleGetTopDoctorsHomepage,
     handleGetAllDoctors,
@@ -124,5 +136,6 @@ module.exports = {
     handleGetMarkdown,
     handleBulkCreateSchedule,
     handleGetScheduleByDate,
-    handleGetDoctorInfoExtra
+    handleGetDoctorInfoExtra,
+    handleGetDoctorInfoGeneral
 }

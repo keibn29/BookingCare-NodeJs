@@ -251,7 +251,6 @@ let getMarkdown = (doctorId) => {
 let bulkCreateSchedule = (scheduleInput) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log(scheduleInput.date)
             if (!scheduleInput.result || !scheduleInput.doctorId || !scheduleInput.date) {
                 resolve({
                     errCode: 1,
@@ -275,7 +274,6 @@ let bulkCreateSchedule = (scheduleInput) => {
                 attributes: ['timeType', 'date', 'doctorId', 'maxNumber'],
                 raw: true
             })
-            console.log('check existing: ', existing)
 
             //convert date to timestamp
             // if (existing && existing.length > 0) {
@@ -376,6 +374,57 @@ let getDoctorInfoExtra = (doctorId) => {
     })
 }
 
+let getDoctorInfoGeneral = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+
+            let infoGeneral = await db.User.findOne({
+                where: {
+                    id: doctorId
+                },
+                attributes: {
+                    exclude: ['password']
+                },
+                include: [
+                    { model: db.Markdown, attributes: ['description'] },
+                    { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                    {
+                        model: db.Doctor,
+                        attributes: ['priceId', 'provinceId', 'paymentId', 'addressClinic', 'nameClinic', 'note'],
+                        include: [
+                            { model: db.Allcode, as: 'priceData', attributes: ['valueEn', 'valueVi'] },
+                            { model: db.Allcode, as: 'provinceData', attributes: ['valueEn', 'valueVi'] },
+                            { model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi'] },
+                        ]
+                    },
+                ],
+                raw: false,
+                nest: true
+            })
+            if (!infoGeneral) {
+                infoGeneral = {}
+            }
+            //decode-base64
+            if (infoGeneral && infoGeneral.image) {
+                infoGeneral.image = new Buffer(infoGeneral.image, 'base64').toString('binary');
+            }
+
+            resolve({
+                errCode: 0,
+                infoGeneral
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     GetTopDoctorsHomepage,
     getetAllDoctors,
@@ -385,5 +434,6 @@ module.exports = {
     getMarkdown,
     bulkCreateSchedule,
     getScheduleByDate,
-    getDoctorInfoExtra
+    getDoctorInfoExtra,
+    getDoctorInfoGeneral
 }
