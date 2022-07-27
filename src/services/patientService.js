@@ -1,0 +1,55 @@
+import db from '../models/index';
+
+let createBookAppointment = (dataBooking) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!dataBooking.email || !dataBooking.doctorId || !dataBooking.timeType || !dataBooking.date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                //không tồn tại -> tạo mới
+                //upsert patient
+                let user = await db.User.findOrCreate({
+                    where: {
+                        email: dataBooking.email
+                    },
+                    defaults: {
+                        email: dataBooking.email,
+                        roleId: 'R3'
+                    }
+                })
+                //create booking record
+                if (user && user[0]) {
+                    await db.Booking.findOrCreate({
+                        where: {
+                            patientId: user[0].id,
+                            // doctorId: dataBooking.doctorId,
+                            // date: dataBooking.date,
+                            // timeType: dataBooking.timeType
+                        },
+                        defaults: {
+                            statusId: 'S1',
+                            patientId: user[0].id,
+                            doctorId: dataBooking.doctorId,
+                            date: dataBooking.date,
+                            timeType: dataBooking.timeType
+                        }
+                    })
+                }
+
+                resolve({
+                    errCode: 0,
+                    errMessage: 'OK'
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
+module.exports = {
+    createBookAppointment
+}
