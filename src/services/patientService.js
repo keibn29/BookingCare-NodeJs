@@ -1,14 +1,27 @@
 import db from '../models/index';
+import emailService from './emailService';
 
 let createBookAppointment = (dataBooking) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!dataBooking.email || !dataBooking.doctorId || !dataBooking.timeType || !dataBooking.date) {
+            if (!dataBooking.email || !dataBooking.doctorId ||
+                !dataBooking.timeType || !dataBooking.date ||
+                !dataBooking.fullName || !dataBooking.timeString) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
                 })
             } else {
+
+                await emailService.sendSimpleEmail({
+                    receiverEmail: dataBooking.email,
+                    patientName: dataBooking.fullName,
+                    time: dataBooking.timeString,
+                    doctorName: dataBooking.doctorName,
+                    language: dataBooking.language,
+                    redirectLink: 'https://www.facebook.com/keibn29'
+                })
+
                 //không tồn tại -> tạo mới
                 //upsert patient
                 let user = await db.User.findOrCreate({
