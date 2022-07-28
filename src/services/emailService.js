@@ -17,9 +17,18 @@ let sendSimpleEmail = async (dataSend) => {
     let info = await transporter.sendMail({
         from: '"Kei Nguyen" <keibn29@gmail.com>', // sender address
         to: dataSend.receiverEmail, // list of receivers
-        subject: dataSend.language === 'vi' ? "Thông tin đặt lịch khám bệnh" : "Information to book a medical appointment", // Subject line
-        html: renderHTMLByLanguage(), // html body
+        subject: renderSubjectByLanguage(dataSend), // Subject line
+        html: renderHTMLByLanguage(dataSend), // html body
     });
+}
+
+let renderSubjectByLanguage = (dataSend) => {
+    if (dataSend.language === 'vi') {
+        return 'Thông tin đặt lịch khám bệnh'
+    }
+    if (dataSend.language === 'en') {
+        return 'Information to book a medical appointment'
+    }
 }
 
 let renderHTMLByLanguage = (dataSend) => {
@@ -43,7 +52,7 @@ let renderHTMLByLanguage = (dataSend) => {
         return `
         <h3>Dear ${dataSend.patientName}</h3>
         <p>You received this email because you booked a medical appointment directly on BookingCare</p>
-        <p>Thông tin lịch khám bệnh:</p>
+        <p>Information on medical examination schedule:</p>
         <div><b>Time: ${dataSend.time}</b></div>
         <div><b>Doctor: ${dataSend.doctorName}</b></div>
 

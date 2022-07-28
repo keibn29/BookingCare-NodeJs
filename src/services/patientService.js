@@ -1,5 +1,15 @@
 import db from '../models/index';
+require('dotenv').config();
 import emailService from './emailService';
+import { v4 as uuidv4 } from 'uuid';
+import { flatMap, reject } from 'lodash';
+
+
+let buildUrlEmail = (doctorId, token) => {
+    let result = `${process.env.URL_REACT}/verify-booking?doctorId=${doctorId}&token=${token}`; //compare 2 key (doctorId, token)
+
+    return result;
+}
 
 let createBookAppointment = (dataBooking) => {
     return new Promise(async (resolve, reject) => {
@@ -12,6 +22,7 @@ let createBookAppointment = (dataBooking) => {
                     errMessage: 'Missing required parameters'
                 })
             } else {
+                let token = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
 
                 await emailService.sendSimpleEmail({
                     receiverEmail: dataBooking.email,
@@ -19,7 +30,7 @@ let createBookAppointment = (dataBooking) => {
                     time: dataBooking.timeString,
                     doctorName: dataBooking.doctorName,
                     language: dataBooking.language,
-                    redirectLink: 'https://www.facebook.com/keibn29'
+                    redirectLink: buildUrlEmail(dataBooking.doctorId, token)
                 })
 
                 //không tồn tại -> tạo mới
@@ -38,8 +49,8 @@ let createBookAppointment = (dataBooking) => {
                     await db.Booking.findOrCreate({
                         where: {
                             patientId: user[0].id,
-                            // doctorId: dataBooking.doctorId,
-                            // date: dataBooking.date,
+                            doctorId: dataBooking.doctorId,
+                            date: dataBooking.date,
                             // timeType: dataBooking.timeType
                         },
                         defaults: {
@@ -47,7 +58,8 @@ let createBookAppointment = (dataBooking) => {
                             patientId: user[0].id,
                             doctorId: dataBooking.doctorId,
                             date: dataBooking.date,
-                            timeType: dataBooking.timeType
+                            timeType: dataBooking.timeType,
+                            token: token
                         }
                     })
                 }
@@ -63,6 +75,44 @@ let createBookAppointment = (dataBooking) => {
     })
 }
 
+let verifyBookAppointment = (token, doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!token || !doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                let appointment = await db.Booking.findOne({
+                    where: {
+                        doctorId: doctorId,
+                        token: token,
+                        statusId: 'S1'
+                    }
+                })
+                if (appointment) {
+                    appointment.statusId = 'S2'
+
+                    await appointment.save();
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'OK'
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `Appointment has been activated or doesn't exist`
+                    })
+                }
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
-    createBookAppointment
+    createBookAppointment,
+    verifyBookAppointment
 }
