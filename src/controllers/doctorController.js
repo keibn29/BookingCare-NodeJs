@@ -1,7 +1,7 @@
 import doctorService from '../services/doctorService'
 
 let handleGetTopDoctorsHomepage = async (req, res) => {
-    let limit = req.body.limit;
+    let limit = req.query.limit;
     try {
         let response = await doctorService.GetTopDoctorsHomepage(+limit) // + : convert from string to integer
         return res.status(200).json(response)
