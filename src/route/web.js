@@ -48,6 +48,9 @@ let initWebRoutes = (app) => {
     router.put('/api/edit-special', specialtyController.handleEditSpecialty)
 
     router.get('/api/get-all-clinic', clinicController.handleGetAllClinic)
+    router.get('/api/top-clinic-homepage', clinicController.handleGetTopClinic)
+    router.post('/api/create-new-clinic', clinicController.handleCreateClinic)
+    router.put('/api/edit-clinic', clinicController.handleEditClinic)
 
 
     return app.use('/', router)
