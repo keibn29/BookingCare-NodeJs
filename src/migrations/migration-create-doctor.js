@@ -12,6 +12,12 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false
             },
+            specialtyId: {
+                type: Sequelize.INTEGER,
+            },
+            clinicId: {
+                type: Sequelize.INTEGER,
+            },
             priceId: {
                 type: Sequelize.STRING,
                 allowNull: false
@@ -21,14 +27,6 @@ module.exports = {
                 allowNull: false
             },
             paymentId: {
-                type: Sequelize.STRING,
-                allowNull: false
-            },
-            addressClinic: {
-                type: Sequelize.STRING,
-                allowNull: false
-            },
-            nameClinic: {
                 type: Sequelize.STRING,
                 allowNull: false
             },

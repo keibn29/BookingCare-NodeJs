@@ -1,4 +1,3 @@
-import { reject } from 'lodash';
 import db from '../models/index';
 
 let createSpecialty = (specialtyData) => {
@@ -42,7 +41,7 @@ let getTopSpecialty = (limitInput) => {
             //decode-base64
             if (topSpecialty && topSpecialty.length > 0) {
                 topSpecialty.map((item) => {
-                    item.image = new Buffer(item.image, 'base64').toString('binary');
+                    item.image = Buffer.from(item.image, 'base64').toString('binary');
                     return item;
                 })
             }
@@ -65,7 +64,7 @@ let getAllSpecialty = () => {
             //decode-base64
             if (allSpecialty && allSpecialty.length > 0) {
                 allSpecialty.map((item) => {
-                    item.image = new Buffer(item.image, 'base64').toString('binary');
+                    item.image = Buffer.from(item.image, 'base64').toString('binary');
                     return item;
                 })
             }

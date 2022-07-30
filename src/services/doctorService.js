@@ -64,7 +64,7 @@ let createDoctorInfo = (inputData) => {
             if (!inputData.doctorId || !inputData.contentHTML
                 || !inputData.contentMarkdown || !inputData.priceId
                 || !inputData.provinceId || !inputData.paymentId
-                || !inputData.nameClinic || !inputData.addressClinic) {
+                || !inputData.clinicId || !inputData.specialtyId) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
@@ -95,8 +95,8 @@ let createDoctorInfo = (inputData) => {
                     priceId: inputData.priceId,
                     provinceId: inputData.provinceId,
                     paymentId: inputData.paymentId,
-                    nameClinic: inputData.nameClinic,
-                    addressClinic: inputData.addressClinic,
+                    clinicId: inputData.clinicId,
+                    specialtyId: inputData.specialtyId,
                     note: inputData.note
                 })
             }
@@ -139,11 +139,13 @@ let getDoctorInfo = (doctorId) => {
                         { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
                         {
                             model: db.Doctor,
-                            attributes: ['priceId', 'provinceId', 'paymentId', 'addressClinic', 'nameClinic', 'note'],
+                            attributes: ['priceId', 'provinceId', 'paymentId', 'specialtyId', 'clinicId', 'note'],
                             include: [
                                 { model: db.Allcode, as: 'priceData', attributes: ['valueEn', 'valueVi'] },
                                 { model: db.Allcode, as: 'provinceData', attributes: ['valueEn', 'valueVi'] },
                                 { model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Clinic, as: 'clinicData', attributes: ['nameEn', 'nameVi', 'address'] },
+                                { model: db.Specialty, as: 'specialtyData', attributes: ['nameEn', 'nameVi'] },
                             ]
                         },
                     ],
@@ -155,7 +157,7 @@ let getDoctorInfo = (doctorId) => {
                 }
                 //decode-base64
                 if (doctorInfo && doctorInfo.image) {
-                    doctorInfo.image = new Buffer(doctorInfo.image, 'base64').toString('binary');
+                    doctorInfo.image = Buffer.from(doctorInfo.image, 'base64').toString('binary');
                 }
                 resolve({
                     errCode: 0,
@@ -202,8 +204,8 @@ let editDoctorInfo = (inputData) => {
             doctorDetail.priceId = inputData.priceId;
             doctorDetail.provinceId = inputData.provinceId;
             doctorDetail.paymentId = inputData.paymentId;
-            doctorDetail.nameClinic = inputData.nameClinic;
-            doctorDetail.addressClinic = inputData.addressClinic;
+            doctorDetail.clinicId = inputData.clinicId;
+            doctorDetail.specialtyId = inputData.specialtyId;
             doctorDetail.note = inputData.note;
 
             await doctorMarkdown.save();
@@ -356,7 +358,8 @@ let getDoctorInfoExtra = (doctorId) => {
                 include: [
                     { model: db.Allcode, as: 'priceData', attributes: ['valueEn', 'valueVi'] },
                     { model: db.Allcode, as: 'provinceData', attributes: ['valueEn', 'valueVi'] },
-                    { model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi'] }
+                    { model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi'] },
+                    { model: db.Clinic, as: 'clinicData', attributes: ['nameEn', 'nameVi', 'address'] }
                 ],
                 raw: false,
                 nest: true
@@ -396,11 +399,13 @@ let getDoctorInfoGeneral = (doctorId) => {
                     { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
                     {
                         model: db.Doctor,
-                        attributes: ['priceId', 'provinceId', 'paymentId', 'addressClinic', 'nameClinic', 'note'],
+                        attributes: ['priceId', 'provinceId', 'paymentId', 'clinicId', 'note'],
                         include: [
                             { model: db.Allcode, as: 'priceData', attributes: ['valueEn', 'valueVi'] },
                             { model: db.Allcode, as: 'provinceData', attributes: ['valueEn', 'valueVi'] },
                             { model: db.Allcode, as: 'paymentData', attributes: ['valueEn', 'valueVi'] },
+                            // { model: db.Clinic, as: 'clinicData', attributes: ['nameEn', 'nameVi', 'address'] },
+                            // { model: db.Specialty, as: 'specialtyData', attributes: ['nameEn', 'nameVi'] },
                         ]
                     },
                 ],
@@ -412,7 +417,7 @@ let getDoctorInfoGeneral = (doctorId) => {
             }
             //decode-base64
             if (infoGeneral && infoGeneral.image) {
-                infoGeneral.image = new Buffer(infoGeneral.image, 'base64').toString('binary');
+                infoGeneral.image = Buffer.from(infoGeneral.image, 'base64').toString('binary');
             }
 
             resolve({
