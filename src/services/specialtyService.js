@@ -1,3 +1,4 @@
+import { reject } from 'lodash';
 import db from '../models/index';
 
 let createSpecialty = (specialtyData) => {
@@ -123,9 +124,72 @@ let editSpecialty = (specialtyData) => {
     })
 }
 
+let getSpecialtyById = (specialtyId, location) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!specialtyId || !location) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                let specialty = {}
+                if (location === 'ALL') {
+                    specialty = await db.Specialty.findOne({
+                        where: {
+                            id: specialtyId
+                        },
+                        attributes: {
+                            exclude: ['image']
+                        },
+                        include: [
+                            {
+                                model: db.Doctor, as: 'specialtyData', attributes: ['doctorId', 'provinceId']
+                            },
+                        ]
+                    })
+                } else {
+                    specialty = await db.Specialty.findOne({
+                        where: {
+                            id: specialtyId
+                        },
+                        attributes: {
+                            exclude: ['image']
+                        },
+                        include: [
+                            {
+                                model: db.Doctor,
+                                as: 'specialtyData',
+                                where: {
+                                    provinceId: location
+                                },
+                                attributes: ['doctorId', 'provinceId']
+                            },
+                        ]
+                    })
+                }
+                if (!specialty) {
+                    specialty = {}
+                }
+                //decode-base64
+                if (specialty && specialty.image) {
+                    specialty.image = Buffer.from(specialty.image, 'base64').toString('binary');
+                }
+                resolve({
+                    errCode: 0,
+                    specialty
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     createSpecialty,
     getTopSpecialty,
     getAllSpecialty,
-    editSpecialty
+    editSpecialty,
+    getSpecialtyById
 }

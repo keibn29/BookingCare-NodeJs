@@ -53,9 +53,23 @@ let handleEditSpecialty = async (req, res) => {
     }
 }
 
+let handleGetSpecialtyById = async (req, res) => {
+    try {
+        let detail = await specialtyService.getSpecialtyById(req.query.specialtyId, req.query.location);
+        return res.status(200).json(detail)
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleCreateSpecialty,
     handleGetTopSpecialty,
     handleGetAllSpecialty,
-    handleEditSpecialty
+    handleEditSpecialty,
+    handleGetSpecialtyById
 }
