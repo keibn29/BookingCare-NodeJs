@@ -312,26 +312,27 @@ let getScheduleByDate = (doctorId, date) => {
                     errCode: 1,
                     errMessage: 'Missing required parameters'
                 })
+            } else {
+                let schedule = await db.Schedule.findAll({
+                    where: {
+                        doctorId: doctorId,
+                        date: date
+                    },
+                    include: [
+                        { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName'] }
+                    ],
+                    raw: false,
+                    nest: true
+                })
+                if (!schedule) {
+                    schedule = []
+                }
+                resolve({
+                    errCode: 0,
+                    schedule
+                })
             }
-            let schedule = await db.Schedule.findAll({
-                where: {
-                    doctorId: doctorId,
-                    date: date
-                },
-                include: [
-                    { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
-                    { model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName'] }
-                ],
-                raw: false,
-                nest: true
-            })
-            if (!schedule) {
-                schedule = []
-            }
-            resolve({
-                errCode: 0,
-                schedule
-            })
         } catch (e) {
             reject(e)
         }
