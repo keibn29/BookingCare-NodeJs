@@ -139,9 +139,6 @@ let getSpecialtyById = (specialtyId, location) => {
                         where: {
                             id: specialtyId
                         },
-                        attributes: {
-                            exclude: ['image']
-                        },
                         include: [
                             {
                                 model: db.Doctor, as: 'specialtyData', attributes: ['doctorId', 'provinceId']
