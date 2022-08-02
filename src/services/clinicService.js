@@ -101,7 +101,6 @@ let editClinic = (clinicData) => {
 let getTopClinic = (limitInput) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log('check limit: ', limitInput)
             if (!limitInput) {
                 limitInput = 10;
             }
@@ -128,9 +127,66 @@ let getTopClinic = (limitInput) => {
     })
 }
 
+let getClinicById = (clinicId, location) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!clinicId || !location) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                let clinic = {}
+                if (location === 'ALL') {
+                    clinic = await db.Clinic.findOne({
+                        where: {
+                            id: clinicId
+                        },
+                        include: [
+                            {
+                                model: db.Doctor, as: 'clinicData', attributes: ['doctorId', 'provinceId']
+                            },
+                        ]
+                    })
+                } else {
+                    clinic = await db.Clinic.findOne({
+                        where: {
+                            id: clinicId
+                        },
+                        include: [
+                            {
+                                model: db.Doctor,
+                                as: 'clinicData',
+                                where: {
+                                    provinceId: location
+                                },
+                                attributes: ['doctorId', 'provinceId']
+                            },
+                        ]
+                    })
+                }
+                if (!clinic) {
+                    clinic = {}
+                }
+                //decode-base64
+                if (clinic && clinic.image) {
+                    clinic.image = Buffer.from(clinic.image, 'base64').toString('binary');
+                }
+                resolve({
+                    errCode: 0,
+                    clinic
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     getAllClinic,
     createClinic,
     editClinic,
-    getTopClinic
+    getTopClinic,
+    getClinicById
 }

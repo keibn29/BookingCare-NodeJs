@@ -52,9 +52,23 @@ let handleGetTopClinic = async (req, res) => {
     }
 }
 
+let handleGetClinicById = async (req, res) => {
+    try {
+        let clinic = await clinicService.getClinicById(req.query.clinicId, req.query.location);
+        return res.status(200).json(clinic)
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleGetAllClinic,
     handleCreateClinic,
     handleEditClinic,
-    handleGetTopClinic
+    handleGetTopClinic,
+    handleGetClinicById
 }
