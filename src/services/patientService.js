@@ -14,9 +14,11 @@ let buildUrlEmail = (doctorId, token) => {
 let createBookAppointment = (dataBooking) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!dataBooking.email || !dataBooking.doctorId ||
-                !dataBooking.timeType || !dataBooking.date ||
-                !dataBooking.fullName || !dataBooking.timeString) {
+            if (!dataBooking.email || !dataBooking.doctorId
+                || !dataBooking.timeType || !dataBooking.date
+                || !dataBooking.fullName || !dataBooking.timeString
+                || !dataBooking.address || !dataBooking.phoneNumber
+                || !dataBooking.selectedGender || !dataBooking.reason) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
@@ -41,7 +43,11 @@ let createBookAppointment = (dataBooking) => {
                     },
                     defaults: {
                         email: dataBooking.email,
-                        roleId: 'R3'
+                        roleId: 'R3',
+                        firstName: dataBooking.fullName,
+                        address: dataBooking.address,
+                        phonenumber: dataBooking.phoneNumber,
+                        gender: dataBooking.selectedGender
                     }
                 })
                 //create booking record
@@ -59,6 +65,7 @@ let createBookAppointment = (dataBooking) => {
                             doctorId: dataBooking.doctorId,
                             date: dataBooking.date,
                             timeType: dataBooking.timeType,
+                            reason: dataBooking.reason,
                             token: token
                         }
                     })

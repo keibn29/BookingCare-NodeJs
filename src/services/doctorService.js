@@ -1,6 +1,6 @@
 import db from '../models/index';
 require('dotenv').config();
-import _ from 'lodash';
+import _, { reject } from 'lodash';
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -431,6 +431,45 @@ let getDoctorInfoGeneral = (doctorId) => {
     })
 }
 
+let getAllPatientByDate = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId || !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                let allPatient = await db.User.findAll({
+                    attributes: ['firstName', 'email', 'phonenumber', 'address'],
+                    include: [
+                        { model: db.Allcode, as: 'genderData', attributes: ['valueVi', 'valueEn'] },
+                        {
+                            model: db.Booking,
+                            as: 'bookingData',
+                            where: {
+                                statusId: 'S2',
+                                doctorId: doctorId,
+                                date: date
+                            },
+                            attributes: ['reason'],
+                            include: [
+                                { model: db.Allcode, as: 'timeBooking', attributes: ['valueVi', 'valueEn'] }
+                            ]
+                        }
+                    ]
+                })
+                resolve({
+                    errCode: 0,
+                    allPatient
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     GetTopDoctorsHomepage,
     getetAllDoctors,
@@ -441,5 +480,6 @@ module.exports = {
     bulkCreateSchedule,
     getScheduleByDate,
     getDoctorInfoExtra,
-    getDoctorInfoGeneral
+    getDoctorInfoGeneral,
+    getAllPatientByDate
 }

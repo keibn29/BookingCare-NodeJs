@@ -128,6 +128,19 @@ let handleGetDoctorInfoGeneral = async (req, res) => {
     }
 }
 
+let handleGetAllPatientByDate = async (req, res) => {
+    try {
+        let allPatient = await doctorService.getAllPatientByDate(req.query.doctorId, req.query.date)
+        return res.status(200).json(allPatient)
+    } catch (e) {
+        console.log('check eroor: ', e)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleGetTopDoctorsHomepage,
     handleGetAllDoctors,
@@ -138,5 +151,6 @@ module.exports = {
     handleBulkCreateSchedule,
     handleGetScheduleByDate,
     handleGetDoctorInfoExtra,
-    handleGetDoctorInfoGeneral
+    handleGetDoctorInfoGeneral,
+    handleGetAllPatientByDate
 }
