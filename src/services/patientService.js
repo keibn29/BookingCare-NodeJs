@@ -2,7 +2,6 @@ import db from '../models/index';
 require('dotenv').config();
 import emailService from './emailService';
 import { v4 as uuidv4 } from 'uuid';
-import { flatMap, reject } from 'lodash';
 
 
 let buildUrlEmail = (doctorId, token) => {
