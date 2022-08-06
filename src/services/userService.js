@@ -24,7 +24,7 @@ let handleUserLogin = (email, password) => {
                     where: {
                         email: email
                     },
-                    attributes: ['id', 'email', 'roleId', 'password', 'firstName'],
+                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName'],
                     raw: true
                 })
                 if (user) {
