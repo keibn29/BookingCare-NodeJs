@@ -112,8 +112,41 @@ let editHandbook = (data) => {
     })
 }
 
+let getDetailHandbook = (handbookId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!handbookId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            } else {
+                let detailHandbook = await db.Handbook.findOne({
+                    where: {
+                        id: handbookId
+                    }
+                })
+                if (!detailHandbook) {
+                    detailHandbook = {}
+                }
+                //decode-base64
+                if (detailHandbook && detailHandbook.image) {
+                    detailHandbook.image = Buffer.from(detailHandbook.image, 'base64').toString('binary');
+                }
+                resolve({
+                    errCode: 0,
+                    detailHandbook
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     createHandbook,
     getAllHandbook,
-    editHandbook
+    editHandbook,
+    getDetailHandbook
 }

@@ -51,10 +51,32 @@ let getetAllDoctors = () => {
                 where: {
                     roleId: 'R2'
                 },
+                order: [['createdAt', 'DESC']],
                 attributes: {
-                    exclude: ['password', 'image']
-                }
+                    exclude: ['password']
+                },
+                include: [
+                    { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                    {
+                        model: db.Doctor,
+                        attributes: [],
+                        include: [
+                            { model: db.Specialty, as: 'specialtyData', attributes: ['nameVi', 'nameEn'] },
+                            { model: db.Clinic, as: 'clinicData', attributes: ['nameVi', 'nameEn'] }
+                        ]
+                    }
+                ],
+                raw: true,
+                nest: true
             })
+
+            //decode-base64
+            if (doctors && doctors.length > 0) {
+                doctors.map((item) => {
+                    item.image = Buffer.from(item.image, 'base64').toString('binary');
+                    return item;
+                })
+            }
 
             resolve({
                 errCode: 0,

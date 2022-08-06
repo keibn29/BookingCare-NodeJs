@@ -39,8 +39,22 @@ let handleEditHandbook = async (req, res) => {
     }
 }
 
+let handleGetDetailHandbook = async (req, res) => {
+    try {
+        let detailHandbook = await handbookService.getDetailHandbook(req.query.handbookId)
+        return res.status(200).json(detailHandbook)
+    } catch (e) {
+        console.log(e);
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server!'
+        })
+    }
+}
+
 module.exports = {
     handleCreateHandbook,
     handleGetAllHandbook,
-    handleEditHandbook
+    handleEditHandbook,
+    handleGetDetailHandbook
 }
