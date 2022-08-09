@@ -1,10 +1,14 @@
-import { reject } from 'lodash';
 import db from '../models/index';
+require('dotenv').config();
+
+const LIMIT_TOP_CLINIC_DOCTOR_SPECIALTY = process.env.LIMIT_TOP_CLINIC_DOCTOR_SPECIALTY;
 
 let getAllClinic = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            let allClinic = await db.Clinic.findAll();
+            let allClinic = await db.Clinic.findAll({
+                order: [['createdAt', 'ASC']],
+            });
 
             //decode-base64
             if (allClinic && allClinic.length > 0) {
@@ -102,11 +106,12 @@ let getTopClinic = (limitInput) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!limitInput) {
-                limitInput = 10;
+                limitInput = LIMIT_TOP_CLINIC_DOCTOR_SPECIALTY;
             }
 
             let topClinic = await db.Clinic.findAll({
-                limit: limitInput
+                limit: limitInput,
+                order: [['createdAt', 'ASC']],
             })
 
             //decode-base64

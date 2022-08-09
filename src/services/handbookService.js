@@ -1,6 +1,8 @@
 import db from '../models/index';
 require('dotenv').config();
 
+const LIMIT_TOP_HANDBOOK = process.env.LIMIT_TOP_HANDBOOK;
+
 let createHandbook = (handbookData) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -41,7 +43,9 @@ let getAllHandbook = (limitInput) => {
             } else {
                 let hanbooks = [];
                 if (limitInput === 'ALL') {
-                    hanbooks = await db.Handbook.findAll()
+                    hanbooks = await db.Handbook.findAll({
+                        order: [['createdAt', 'ASC']],
+                    })
 
                     //decode-base64
                     if (hanbooks && hanbooks.length > 0) {
@@ -53,7 +57,8 @@ let getAllHandbook = (limitInput) => {
                 }
                 if (limitInput === 'TOP') {
                     hanbooks = await db.Handbook.findAll({
-                        limit: 5
+                        limit: LIMIT_TOP_HANDBOOK,
+                        order: [['createdAt', 'ASC']],
                     })
 
                     //decode-base64

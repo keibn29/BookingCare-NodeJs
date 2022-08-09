@@ -4,12 +4,13 @@ import _ from 'lodash';
 import emailService from './emailService';
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
+const LIMIT_TOP_CLINIC_DOCTOR_SPECIALTY = process.env.LIMIT_TOP_CLINIC_DOCTOR_SPECIALTY;
 
 let GetTopDoctorsHomepage = (limitInput) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!limitInput) {
-                limitInput = 10;
+                limitInput = LIMIT_TOP_CLINIC_DOCTOR_SPECIALTY;
             }
             let users = await db.User.findAll({
                 limit: limitInput,
@@ -348,6 +349,7 @@ let getScheduleByDate = (doctorId, date) => {
                         doctorId: doctorId,
                         date: '' + date
                     },
+                    order: [['timeType', 'ASC']],
                     include: [
                         { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
                         { model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName'] }
@@ -476,6 +478,7 @@ let getAllPatientByDate = (doctorId, date) => {
                         doctorId: doctorId,
                         date: '' + date
                     },
+                    order: [['timeType', 'ASC']],
                     attributes: ['reason', 'timeType', 'patientId'],
                     include: [
                         {
