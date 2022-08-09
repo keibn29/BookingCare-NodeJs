@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable('bookings', {
+        await queryInterface.createTable('Bookings', {
             // statusId: DataTypes.STRING,
             // doctorId: DataTypes.INTEGER,
             // patientId: DataTypes.INTEGER,
@@ -45,6 +45,6 @@ module.exports = {
         });
     },
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('bookings');
+        await queryInterface.dropTable('Bookings');
     }
 };
