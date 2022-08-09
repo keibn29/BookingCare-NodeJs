@@ -346,7 +346,7 @@ let getScheduleByDate = (doctorId, date) => {
                 let schedule = await db.Schedule.findAll({
                     where: {
                         doctorId: doctorId,
-                        date: date
+                        date: '' + date
                     },
                     include: [
                         { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
@@ -474,7 +474,7 @@ let getAllPatientByDate = (doctorId, date) => {
                     where: {
                         statusId: 'S2',
                         doctorId: doctorId,
-                        date: date
+                        date: '' + date
                     },
                     attributes: ['reason', 'timeType', 'patientId'],
                     include: [
@@ -516,7 +516,7 @@ let sendRemedy = (data) => {
                     where: {
                         doctorId: data.doctorId,
                         patientId: data.patientId,
-                        date: data.date,
+                        date: '' + data.date,
                         timeType: data.timeType,
                         statusId: 'S2'
                     }

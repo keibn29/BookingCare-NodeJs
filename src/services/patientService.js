@@ -73,7 +73,7 @@ let createBookAppointment = (dataBooking) => {
                         where: {
                             patientId: patient.id,
                             doctorId: dataBooking.doctorId,
-                            date: dataBooking.date
+                            date: '' + dataBooking.date
                         }
                     })
                     if (appointment) {
